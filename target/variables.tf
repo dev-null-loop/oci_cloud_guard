@@ -1,31 +1,10 @@
 variable "compartment_id" {
-  description = "(Required) (Updatable) The ID of the compartment in which to list resources."
-  type        = string
-}
-
-variable "tenancy_id" {
-  description = "(Required) (Updatable) The ID of the tenancy in which to list resources."
-  type        = string
-}
-
-variable "reporting_region" {
-  description = "(Required) (Updatable) The reporting region value"
-  type        = string
-}
-
-variable "self_manage_resources" {
-  description = "(Optional) (Updatable) Identifies if Oracle managed resources will be created by customers. If no value is specified false is the default. "
-  type        = bool
-  default     = false
-}
-
-variable "status" {
-  description = "(Required) (Updatable) Status of Cloud Guard Tenant"
+  description = "(Required) Compartment OCID where the resource is created"
   type        = string
 }
 
 variable "display_name" {
-  description = "(Required) (Updatable) DetectorTemplate identifier."
+  description = "(Required) (Updatable) Display name for the target.\n\nAvoid entering confidential information."
   type        = string
 }
 
@@ -35,65 +14,67 @@ variable "target_resource_id" {
 }
 
 variable "target_resource_type" {
-  description = "(Required) possible type of targets(COMPARTMENT/FACLOUD)"
+  description = "(Required) Type of resource that target support (COMPARTMENT/FACLOUD)"
   type        = string
 }
 
 variable "defined_tags" {
-  description = "(Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace."
+  description = "(Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{\"foo-namespace.bar-key\": \"value\"}`"
   type        = map(string)
-  nullable    = true
   default     = null
 }
 
 variable "description" {
-  description = "(Optional) The target description."
+  description = "(Optional) The target description.\n\nAvoid entering confidential information."
   type        = string
   default     = null
 }
 
 variable "freeform_tags" {
-  description = "(Optional) (Updatable) Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only."
+  description = "(Optional) (Updatable) Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{\"bar-key\": \"value\"}`\n\nAvoid entering confidential information."
   type        = map(string)
   default     = {}
 }
 
 variable "state" {
-  description = "(Optional) (Updatable) The current state of the DetectorRule."
+  description = "(Optional) (Updatable) The enablement state of the detector rule"
   type        = string
   default     = null
 }
 
-# variable "cloud_guard_config" {
-#   type = map(object({
-#     comp_name             = string
-#     status                = string
-#     self_manage_resources = bool
-#     region_name           = string
-#   }))
-# }
+variable "target_detector_recipes" {
+  description = "(Optional) (Updatable) List of detector recipes to attach to target"
+  type = list(object({
+    detector_recipe_id = string
+    detector_rules = optional(list(object({
+      details = object({
+        condition_groups = optional(list(object({
+          compartment_id = string
+          condition      = string
+        })), [])
+      })
+      detector_rule_id = string
+    })), [])
+  }))
+  default = []
+}
 
-# variable "cloud_guard_target" {
-#   type = map(object({
-#     comp_name    = string
-#     display_name = string
-#     target_name  = string
-#     target_type  = string
-#   }))
-# }
-
-# variable "compartments" {
-#   type = map(string)
-# }
-
-# variable "cloud_guard_target_resource" {
-#   type = map(string)
-# }
-
-# variable "auth_provider" {
-#   type = map(string)
-# }
-
-# variable "provider_oci" {
-#   type = map(string)
-# }
+variable "target_responder_recipes" {
+  description = "(Optional) (Updatable) List of responder recipes to attach to target"
+  type = list(object({
+    responder_recipe_id = string
+    responder_rules = optional(list(object({
+      details = object({
+        condition = optional(string)
+        configurations = optional(list(object({
+          config_key = string
+          name       = string
+          value      = string
+        })), [])
+        mode = optional(string)
+      })
+      responder_rule_id = string
+    })), [])
+  }))
+  default = []
+}
